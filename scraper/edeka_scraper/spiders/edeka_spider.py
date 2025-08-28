@@ -1,4 +1,5 @@
 import scrapy
+import re
 from datetime import datetime
 from edeka_scraper.items import EdekaProductItem
 
@@ -21,7 +22,7 @@ class EdekaSpider(scrapy.Spider):
         # Usamos XPath para extraer todas las URLs de productos del sitemap
         product_urls = response.xpath('//s:loc/text()').getall()
 
-        spider.logger.info(f"Se encontraron {len(product_urls)} URLs de productos en el sitemap.")
+        self.logger.info(f"Se encontraron {len(product_urls)} URLs de productos en el sitemap.")
 
         # Para cada URL de producto, creamos una nueva solicitud (Request)
         # para que Scrapy la visite y la procese con el metodo parse_product
@@ -35,21 +36,31 @@ class EdekaSpider(scrapy.Spider):
         # Rellenamos los campos usando selectores CSS
         # El método .get() devuelve el primer resultado, o None si no encuentra nada.
         # El método .strip() elimina espacios en blanco al principio y al final.
-        item['name'] = response.css('h1.product-title::text').get().strip()
-        item['price_amount'] = response.css('meta[itemprop="price"]::attr(content)').get()
-        item['price_currency'] = response.css('meta[itemprop="priceCurrency"]::attr(content)').get()
-        item['sku'] = response.css('div[itemprop="sku"]::text').get()
+        item['name'] = response.css('div.detail-description h1::text').get().strip()
+        price_text = response.css('div.price::text').get()
+        if price_text:
+            # Usamos una expresión regular para extraer solo los números y la coma
+            match = re.search(r'(\d+,\d+)', price_text)
+            if match:
+                # Reemplazamos la coma por un punto para convertirlo a número decimal
+                item['price_amount'] = float(match.group(1).replace(',', '.'))
         
-        item['product_url'] = response.url
+        item['price_currency'] = 'EUR'
+
+        item['sku'] = response.css('div[itemprop="sku"]::text').get(default='N/A').strip()
+        
         # La URL de la imagen a veces es relativa, la convertimos en absoluta
-        img_src = response.css('img.article-image::attr(src)').get()
+        item['product_url'] = response.url
+        img_src = response.css('div.detail-image img::attr(src)').get()
         item['image_url'] = response.urljoin(img_src)
         
         # Usamos .getall() para obtener todo el texto y lo unimos
-        item['description'] = " ".join(response.css('div.longdesc div.desc::text').getall()).strip()
-        item['category'] = response.css('ul.breadcrumb li a::text').getall()[-1].strip()
+        description_parts = response.css('div#description *::text').getall()
+        item['description'] = " ".join(part.strip() for part in description_parts if part.strip())
+        item['category'] = response.css('div.breadcrumb li:last-child a::text').get().strip()
         
-        item['base_price_text'] = response.css('div.price-per-unit::text').get().strip()
+        base_price_text = response.xpath("//li[contains(., 'Grundpreis')]/text()").get()
+        item['base_price_text'] = base_price_text.strip() if base_price_text else 'N/A'
         
         # Añadimos metadatos
         item['scraped_at'] = datetime.utcnow()
