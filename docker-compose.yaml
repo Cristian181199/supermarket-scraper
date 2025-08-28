@@ -1,0 +1,31 @@
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  scraper:
+    container_name: scraper
+    build:
+      context: ./scraper
+    env_file:
+      - .env
+    volumes:
+      - ./scraper:/usr/src/app
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: "python main.py"  # Reemplaza por el comando real
+volumes:
+  postgres_data:
