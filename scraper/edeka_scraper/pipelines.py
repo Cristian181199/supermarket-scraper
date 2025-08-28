@@ -31,8 +31,8 @@ class PostgresPipeline:
                 name TEXT,
                 price_amount NUMERIC(10, 2),
                 price_currency VARCHAR(10),
-                sku VARCHAR(50) UNIQUE,
-                product_url TEXT,
+                sku VARCHAR(50),
+                product_url TEXT UNIQUE,
                 image_url TEXT,
                 description TEXT,
                 category TEXT,
@@ -62,7 +62,7 @@ class PostgresPipeline:
                 image_url, description, category, base_price_text,
                 scraped_at, source_supermarket
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (sku) DO UPDATE SET
+            ON CONFLICT (product_url) DO UPDATE SET
                 name = EXCLUDED.name,
                 price_amount = EXCLUDED.price_amount,
                 price_currency = EXCLUDED.price_currency,
