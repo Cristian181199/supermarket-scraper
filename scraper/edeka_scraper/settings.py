@@ -1,36 +1,38 @@
-# scraper/edeka_scraper/settings.py
+# Scrapy settings for the edeka_scraper project.
+# For a full list of settings and their documentation, see:
+# https://docs.scrapy.org/en/latest/topics/settings.html
 import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde el archivo .env que esta en la raiz del proyecto
-# __file__ es la ruta de este fichero (settings.py)
-# os.path.dirname se usa 3 veces para subir 3 niveles y llegar a la raiz del proyecto
+# --- Load Environment Variables ---
+# Load variables from the .env file located at the project root.
+# __file__ is the path to this settings.py file.
+# os.path.dirname is used three times to navigate up to the project root.
 env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
 load_dotenv(dotenv_path=env_path)
 
 
-
+# --- General Project Settings ---
 BOT_NAME = "edeka_scraper"
-
 SPIDER_MODULES = ["edeka_scraper.spiders"]
 NEWSPIDER_MODULE = "edeka_scraper.spiders"
 
 ADDONS = {}
 
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-# 1. Identificate. Es buena practica usar el nombre del bot y un email de contacto
+# --- Crawling Politeness ---
+# 1. Identify your bot with a descriptive User-Agent.
+# It's good practice to include contact information.
 USER_AGENT = "EdekaScraper/1.0 (+cristian181199@gmail.com)"
 
-# Obey robots.txt rules
-# 2. Obedece las reglas de robots.txt
+# 2. Obey the rules defined in the target website's robots.txt file.
 ROBOTSTXT_OBEY = True
 
-# Concurrency and throttling settings
-# 3. Configura el delay que te piden en el robots.txt
-#CONCURRENT_REQUESTS = 16
+# 3. Configure a download delay to avoid overwhelming the server.
+# This helps to be a responsible crawler.
+# CONCURRENT_REQUESTS = 16  # Default is 16
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
-DOWNLOAD_DELAY = 20
+DOWNLOAD_DELAY = 20 # A significant delay to be respectful
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -62,9 +64,9 @@ DOWNLOAD_DELAY = 20
 #    "scrapy.extensions.telnet.TelnetConsole": None,
 #}
 
-# Configure item pipelines
-# See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# 4. Activa tu pipeline. El numero (300) indica el orden en el que se ejecutan los pipelines
+# --- Item Pipelines ---
+# 4. Activate your custom pipeline. The number (e.g., 300) indicates
+# the order of execution if multiple pipelines are used.
 ITEM_PIPELINES = {
     "edeka_scraper.pipelines.PostgresPipeline": 300,
 }
@@ -90,12 +92,15 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
 
-# 5. Agrega la configuracion de la base de datos usando las variables de entorno
+# --- Database Configuration ---
+# 5. Add database settings using environment variables.
+# This keeps sensitive information out of the code.
 POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'postgres_db')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 
-# Set settings whose default value is deprecated to a future-proof value
+# --- Feed Export Settings ---
+# Set a future-proof value for feed export encoding.
 FEED_EXPORT_ENCODING = "utf-8"
