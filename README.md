@@ -35,7 +35,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/cristian181199/supermarket-scraper.git](https://github.com/cristian181199/supermarket-scraper.git)
+    git clone https://github.com/cristian181199/supermarket-scraper.git
     cd supermarket-scraper
     ```
 
