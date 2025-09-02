@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 # Load variables from the .env file located at the project root.
 # __file__ is the path to this settings.py file.
 # os.path.dirname is used three times to navigate up to the project root.
-env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
-load_dotenv(dotenv_path=env_path)
+# env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+# load_dotenv(dotenv_path=env_path)
 
 
 # --- General Project Settings ---
