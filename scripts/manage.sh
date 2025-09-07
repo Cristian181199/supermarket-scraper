@@ -43,6 +43,16 @@ scrape_edeka() {
     docker-compose exec scraper scrapy crawl edeka
 }
 
+makemigrations() {
+    echo "Generando nuevo script de migración..."
+    docker-compose exec scraper alembic revision --autogenerate -m "$1"
+}
+
+migrate() {
+    echo "Aplicando migraciones a la base de datos..."
+    docker-compose exec scraper alembic upgrade head
+}
+
 # Mostrar la ayuda
 usage() {
     echo "Uso: ./scripts/manage.sh [comando]"
@@ -53,6 +63,8 @@ usage() {
     echo "  rebuild     Reconstruye las imágenes y levanta los contenedores."
     echo "  clean       Detiene todo y elimina el volumen de la base de datos."
     echo "  scrape      Ejecuta el scraper de Edeka."
+    echo "  makemigrations <mensaje> Genera un nuevo script de migración."
+    echo "  migrate     Aplica las migraciones a la base de datos."
     echo "  help        Muestra este mensaje de ayuda."
 }
 
@@ -83,6 +95,16 @@ case "$1" in
         ;;
     help)
         usage
+        ;;
+    makemigrations)
+        if [ -z "$2" ]; then
+            echo "Error: Debes proporcionar un mensaje para la migración."
+            exit 1
+        fi
+        makemigrations "$2"
+        ;;
+    migrate)
+        migrate
         ;;
     *)
         echo "Error: Comando '$1' no reconocido."

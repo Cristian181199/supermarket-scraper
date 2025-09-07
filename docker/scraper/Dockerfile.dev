@@ -3,11 +3,11 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
-COPY ./src/scraper/requirements.txt .
+COPY ./scraper/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiamos el script de entrada que mantiene el contenedor vivo
-COPY ./src/scraper/main.py .
+COPY ./scraper/main.py .
 
 CMD ["python", "main.py"]

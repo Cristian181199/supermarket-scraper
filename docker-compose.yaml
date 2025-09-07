@@ -26,7 +26,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src/scraper:/usr/src/app # Montamos el código del scraper para desarrollo
+      - ./scraper:/usr/src/app # Montamos el código del scraper para desarrollo
+      - ./database:/usr/src/app/database # Montamos la carpeta database para Alembic
     depends_on:
       postgres_db:
         condition: service_healthy

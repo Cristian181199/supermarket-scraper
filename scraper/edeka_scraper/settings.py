@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Load variables from the .env file located at the project root.
 # __file__ is the path to this settings.py file.
 # os.path.dirname is used three times to navigate up to the project root.
-# env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+# env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 # load_dotenv(dotenv_path=env_path)
 
 
@@ -68,7 +68,7 @@ DOWNLOAD_DELAY = 20 # A significant delay to be respectful
 # 4. Activate your custom pipeline. The number (e.g., 300) indicates
 # the order of execution if multiple pipelines are used.
 ITEM_PIPELINES = {
-    "edeka_scraper.pipelines.PostgresPipeline": 300,
+    "edeka_scraper.pipelines.SQLAlchemyPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
