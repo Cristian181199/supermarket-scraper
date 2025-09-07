@@ -1,26 +1,31 @@
-# Supermarket Scraper
+# Edeka Scraper
 
 ![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)
-![Scrapy Version](https://img.shields.io/badge/scrapy-2.11%2B-green.svg)
+![Scrapy Version](https://img.shields.io/badge/scrapy-2.13-green.svg)
 ![Database](https://img.shields.io/badge/database-PostgreSQL-blue.svg)
+![Migrations](https://img.shields.io/badge/migrations-Alembic-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
 
-A robust and scalable web scraping system designed to collect product data from supermarket websites. This project is the data acquisition engine for a future AI-powered shopping assistant. The initial implementation targets **Edeka24 (Germany)**, with a modular architecture built for expansion.
+A production-ready web scraping system designed to collect product data from **Edeka24 (Germany)**. Built with a clean, maintainable architecture that separates concerns between data extraction and database management. This project serves as the foundation for a future AI-powered shopping assistant.
 
 ## ✨ Features
 
-- **Automated Data Extraction**: Crawls supermarket websites starting from sitemap indexes to discover and scrape product information.
-- **Normalized Database Schema**: Stores data in a structured PostgreSQL database with relational tables for products, categories (hierarchical), stores, and manufacturers.
-- **Containerized Environment**: Uses **Docker** and **Docker Compose** for a reproducible, isolated, and easy-to-deploy development environment.
-- **Resilient Pipeline**: The Scrapy pipeline handles the creation of the database schema and intelligently inserts or updates products (`UPSERT`) to avoid duplicates.
-- **Respectful Crawling**: Configured to obey `robots.txt` rules and maintain a polite `DOWNLOAD_DELAY` to minimize server load.
+- **🕷️ Automated Data Extraction**: Crawls Edeka24 starting from sitemaps to discover and scrape comprehensive product information
+- **🗄️ Normalized Database Schema**: Structured PostgreSQL database with relational tables for products, hierarchical categories, stores, and manufacturers  
+- **🔄 Database Migrations**: Full Alembic integration for schema versioning and automated database updates
+- **🐳 Containerized Environment**: Complete Docker setup with separate containers for scraper and PostgreSQL
+- **🛠️ Management Scripts**: Easy-to-use commands for all operations (start, migrate, scrape, clean)
+- **💾 Smart Data Pipeline**: Intelligent UPSERT operations to handle product updates and avoid duplicates
+- **🤝 Respectful Crawling**: Obeys robots.txt, implements download delays, and uses descriptive User-Agent
+- **🏗️ Clean Architecture**: Separated scraper logic from database models with proper dependency injection
 
 ## 🛠️ Technology Stack
 
-- **Scraper**: **Scrapy** (Python)
-- **Database**: **PostgreSQL**
-- **Containerization**: **Docker** & **Docker Compose**
-- **Dependencies**: `psycopg2-binary`, `python-dotenv`
+- **Web Scraping**: Scrapy 2.13+ with custom pipelines
+- **Database**: PostgreSQL 15 with SQLAlchemy ORM  
+- **Migrations**: Alembic for database schema management
+- **Containerization**: Docker & Docker Compose
+- **Environment**: Python 3.11, python-dotenv, psycopg2-binary
 
 ## 🚀 Getting Started
 
