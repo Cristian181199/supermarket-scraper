@@ -80,8 +80,8 @@ class Product(BaseModel):
         Index('ix_products_price_range', 'price_amount', 'store_id'),
         Index('ix_products_in_stock', 'in_stock', 'store_id'),
         
-        # Full-text search index
-        Index('ix_products_search_text_gin', 'search_text', postgresql_using='gin'),
+        # Full-text search index (using trigram similarity)
+        Index('ix_products_search_text_gin', 'search_text', postgresql_using='gin', postgresql_ops={'search_text': 'gin_trgm_ops'}),
     )
     
     def generate_search_text(self) -> str:

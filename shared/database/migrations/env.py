@@ -21,9 +21,9 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from database.models import Base
+from shared.database.models import Base
 # Import all models to ensure they're available for autogenerate
-from database.models import store, category, manufacturer, product 
+from shared.database.models import store, category, manufacturer, product
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
