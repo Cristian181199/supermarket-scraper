@@ -1,0 +1,64 @@
+# Docker Compose for modular Edeka Scraper architecture
+version: '3.8'
+
+services:
+  postgres_db:
+    container_name: postgres_db
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/postgres.Dockerfile
+    env_file:
+      - ../.env
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/log/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    container_name: api
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/api.Dockerfile
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONPATH=/usr/src/app
+    volumes:
+      - ../services/api:/usr/src/app/services/api
+      - ../shared:/usr/src/app/shared
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  scraper:
+    container_name: scraper
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/scraper.Dockerfile
+    env_file:
+      - ../.env
+    volumes:
+      - ../services/scraper:/usr/src/app/services/scraper
+      - ../shared:/usr/src/app/shared
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "services/scraper/main.py"]
+
+volumes:
+  postgres_data:
+  postgres_logs:

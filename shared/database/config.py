@@ -132,7 +132,11 @@ db_manager = DatabaseManager()
 # Convenience functions for backward compatibility
 def get_db() -> Generator[Session, None, None]:
     """Función de conveniencia para obtener sesión de base de datos."""
-    return db_manager.get_session_dependency()
+    session = db_manager.SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
 
 
 def create_tables():
