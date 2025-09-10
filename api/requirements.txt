@@ -1,0 +1,11 @@
+# API Dependencies
+fastapi
+uvicorn[standard]
+pydantic
+
+# Shared Database Dependencies
+sqlalchemy
+psycopg2-binary
+python-dotenv
+alembic
+pgvector

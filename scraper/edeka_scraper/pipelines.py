@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from itemadapter import ItemAdapter
 from sqlalchemy.orm import sessionmaker
-from database.models.models import Store, Category, Manufacturer, Product
+from database import models
 from database.session import engine
 
 

@@ -45,12 +45,12 @@ scrape_edeka() {
 
 makemigrations() {
     echo "Generando nuevo script de migración..."
-    docker-compose exec scraper alembic revision --autogenerate -m "$1"
+    docker-compose exec api alembic revision --autogenerate -m "$1"
 }
 
 migrate() {
     echo "Aplicando migraciones a la base de datos..."
-    docker-compose exec scraper alembic upgrade head
+    docker-compose exec api alembic upgrade head
 }
 
 # Mostrar la ayuda
