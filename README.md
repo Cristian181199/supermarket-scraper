@@ -130,12 +130,19 @@ curl "http://localhost:8000/api/v1/products/by-price-range/?min_price=1&max_pric
 ### 🕷️ Running the Scraper
 
 ```bash
-# Access scraper container
-docker exec -it scraper bash
+# Run Edeka24 spider directly
+cd services/scraper
+python -m scrapy crawl edeka24_spider -s CLOSESPIDER_ITEMCOUNT=10
 
-# Run Edeka spider
-scrapy crawl edeka
+# Or with custom limits
+python -m scrapy crawl edeka24_spider -L INFO
 ```
+
+**Features:**
+- ✅ **Sitemap Autodiscovery**: Automatically finds all product sitemaps
+- ✅ **XML Namespace Handling**: Correctly parses sitemaps with namespaces
+- ✅ **Development Limits**: Built-in limits for testing (50 items, 100 pages, 5 min)
+- ✅ **Complete Product Data**: Extracts name, price, category, URL, SKU, and more
 
 ### 📁 Database Access
 

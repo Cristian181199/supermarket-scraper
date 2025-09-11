@@ -1,0 +1,1 @@
+{'url': 'https://httpbin.org/json?product=3', 'method': 'GET', 'status': 200, 'response_url': 'https://httpbin.org/json?product=3', 'timestamp': 1757615534.5084438}
