@@ -160,31 +160,154 @@ edeka-scraper/
 
 ---
 
-## 🎯 IMMEDIATE NEXT PRIORITIES
+## 🎯 UPDATED ROADMAP - SCRAPER FIRST APPROACH
 
-### 🔥 **Phase 2: Content & AI Enhancement**
+**Priority Changed:** Real data is essential for testing AI capabilities effectively.
+
+### 🕷️ **PHASE 2: SCRAPER INTEGRATION (CURRENT PRIORITY)**
+
+#### 🛠️ **2.1: Development Environment Setup (NEXT)**
+
+**2.1.1: Legacy Code Analysis & Migration Plan**
+- [ ] Analyze current scraper structure and identify reusable components
+- [ ] Map existing data fields to new database schema
+- [ ] Identify breaking changes and migration requirements
+- [ ] Create migration strategy for pipelines and spiders
+
+**2.1.2: Modern Scraper Architecture**
+- [ ] Create new scraper structure in `services/scraper/`
+- [ ] Implement base spider class with shared functionality
+- [ ] Create Edeka spider inheriting from base spider
+- [ ] Set up scraper configuration management
+- [ ] Implement environment-specific settings (dev/prod)
+
+**2.1.3: Database Integration Layer**
+- [ ] Create scraper-specific services using new repositories
+- [ ] Implement data transformation layer (scraped data → models)
+- [ ] Add category mapping and hierarchy management
+- [ ] Create manufacturer/brand detection and mapping
+- [ ] Set up store management and multi-store support
+
+**2.1.4: Pipeline Development**
+- [ ] Create validation pipeline for scraped data
+- [ ] Implement duplicate detection and UPSERT logic
+- [ ] Add automatic search text generation
+- [ ] Create error handling and recovery mechanisms
+- [ ] Set up logging and monitoring for scraper
+
+**2.1.5: Development Testing Framework**
+- [ ] Create limited-scope test runs (10-50 products)
+- [ ] Validate data quality and completeness
+- [ ] Test API integration with scraped data
+- [ ] Verify search functionality with real products
+- [ ] Performance testing with development configuration
+
+#### ⚡ **2.2: Development Scraper Configuration**
+```yaml
+Development Mode:
+- Concurrent Requests: 1
+- Download Delay: 3-5 seconds
+- Product Limit: 100-500 products max
+- Categories: 2-3 main categories only
+- IP: Single machine (your local)
+- Respectful: robots.txt compliance
+- Auto-stop: Time limits and item limits
+```
+
+#### 🚀 **2.3: Production Environment Setup**
+- [ ] **Production Configuration** - Multi-threaded, optimized for speed
+- [ ] **Rate Limiting Strategy** - 20s between requests (as required)
+- [ ] **Efficient Crawling** - Concurrent processing, smart queuing
+- [ ] **Data Validation** - Real-time validation and error handling
+- [ ] **Monitoring** - Progress tracking, ETA calculation
+
+#### ⚡ **2.4: Production Scraper Configuration**
+```yaml
+Production Mode:
+- Concurrent Requests: 3-5 (smart throttling)
+- Download Delay: 20 seconds (compliance requirement)
+- Product Target: Full catalog scrape
+- Categories: All available categories
+- Time Target: 2-3 hours complete scrape
+- Error Handling: Robust retry logic
+- Progress Tracking: Real-time ETA and stats
+```
+
+#### 📊 **2.5: Data Pipeline Optimization**
+- [ ] **Batch Processing** - Efficient bulk database operations
+- [ ] **Duplicate Detection** - Smart UPSERT with conflict resolution
+- [ ] **Data Enrichment** - Automatic search text generation
+- [ ] **Category Mapping** - Hierarchical category management
+- [ ] **Store Management** - Multi-store support ready
+
+### 🔥 **PHASE 3: AI ENHANCEMENT & REAL DATA**
 - [ ] **OpenAI API Key Setup** - Enable full AI capabilities
-- [ ] **Embedding Generation** - Process existing products
-- [ ] **Advanced Search Testing** - Validate AI search quality
-- [ ] **More Sample Data** - Expand product catalog
+- [ ] **Real Data Embedding** - Process scraped products with AI
+- [ ] **Search Quality Testing** - Validate AI search with real products
+- [ ] **Performance Optimization** - Index optimization for large datasets
+- [ ] **AI Pipeline Automation** - Background embedding generation
 
-### 🕷️ **Phase 3: Scraper Integration**
-- [ ] **Scraper Modernization** - Adapt to new database structure
-- [ ] **Real Data Integration** - Connect scraper to new models
-- [ ] **Batch Processing** - Efficient bulk operations
-- [ ] **Error Handling** - Robust scraping with retries
-
-### 💬 **Phase 4: Chat Interface**
-- [ ] **WebSocket Setup** - Real-time communication
-- [ ] **Frontend Development** - React-based chat UI
-- [ ] **Conversation Management** - Multi-turn dialogue
+### 💬 **PHASE 4: Chat Interface Development**
+- [ ] **WebSocket Infrastructure** - Real-time communication
+- [ ] **React Frontend** - Modern chat interface
+- [ ] **Conversation Management** - Multi-turn dialogue handling
 - [ ] **Intent Recognition** - Natural language understanding
+- [ ] **Product Integration** - Chat to search/recommendation pipeline
 
-### 🌐 **Phase 5: Production Readiness**
-- [ ] **Performance Optimization** - Query optimization, caching
-- [ ] **Security Hardening** - Authentication, rate limiting
-- [ ] **Monitoring Setup** - Logging, metrics, alerts
-- [ ] **Deployment Pipeline** - CI/CD, staging environment
+### 🌐 **PHASE 5: Production Deployment**
+- [ ] **Performance Tuning** - Database optimization for production load
+- [ ] **Security Implementation** - Authentication, rate limiting, HTTPS
+- [ ] **Monitoring & Alerting** - Comprehensive observability
+- [ ] **CI/CD Pipeline** - Automated deployment pipeline
+- [ ] **Scaling Strategy** - Horizontal scaling preparation
+
+---
+
+## 🏁 IMMEDIATE ACTION PLAN - PHASE 2.1
+
+### 🔍 **Step 1: Legacy Code Analysis (START HERE)**
+
+```bash
+# First, let's examine the existing scraper structure
+find . -name "*.py" -path "./edeka_scraper/*" | head -20
+ls -la edeka_scraper/
+```
+
+**Tasks to complete now:**
+1. 🗑️ Review existing `edeka_scraper/` directory structure
+2. 📋 Identify current spider logic and data extraction patterns
+3. 🔗 Map current Item fields to new database models
+4. 📝 Document pipeline transformations needed
+5. 🎯 Plan integration points with new architecture
+
+### 🔧 **Step 2: Create Modern Scraper Structure**
+
+**Target Structure:**
+```
+services/scraper/
+├── spiders/
+│   ├── base_spider.py      # Base spider class
+│   └── edeka_spider.py     # Edeka-specific implementation
+├── pipelines/
+│   ├── validation.py       # Data validation
+│   ├── database.py         # Database integration
+│   └── enrichment.py       # Data enrichment
+├── items/
+│   └── product_item.py     # Scrapy Item definitions
+├── services/
+│   └── scraper_service.py  # Business logic layer
+├── config/
+│   └── settings.py         # Environment-specific configs
+└── main.py                 # Scraper entry point
+```
+
+### 🎯 **Success Criteria for Phase 2.1**
+- ✅ Legacy code analyzed and migration plan created
+- ✅ New scraper structure implemented and tested
+- ✅ Database integration working with new models
+- ✅ Development configuration scraping 10-50 products successfully
+- ✅ API endpoints returning real scraped data
+- ✅ Search functionality working with scraped products
 
 ---
 
