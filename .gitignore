@@ -17,3 +17,5 @@ ENV/
 
 # Secrets
 .env
+.env.dev
+.env.prod

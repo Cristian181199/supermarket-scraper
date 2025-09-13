@@ -28,7 +28,7 @@ ROBOTSTXT_OBEY = True
 # 3. Configure a download delay to avoid overwhelming the server.
 # This helps to be a responsible crawler.
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
-DOWNLOAD_DELAY = 5  # Reasonable delay for development
+DOWNLOAD_DELAY = 2  # Reduced for faster testing
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -61,10 +61,14 @@ DEFAULT_REQUEST_HEADERS = {
 # }
 
 # --- Item Pipelines ---
-# Configure your pipelines here if needed
-# ITEM_PIPELINES = {
-#     "modern_scraper.pipelines.ModernScraperPipeline": 300,
-# }
+# Configure data processing pipelines in order of execution
+ITEM_PIPELINES = {
+    "modern_scraper.pipelines.validation.ValidationPipeline": 100,
+    "modern_scraper.pipelines.validation.DuplicateDetectionPipeline": 200,
+    "modern_scraper.pipelines.enrichment.EnrichmentPipeline": 300,
+    # Database pipeline for full integration testing
+    "modern_scraper.pipelines.database.DatabasePipeline": 400,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -95,9 +99,17 @@ FEED_EXPORT_ENCODING = "utf-8"
 LOG_LEVEL = 'INFO'
 LOG_FORMAT = '%(levelname)s: %(message)s'
 
-# --- Database Configuration (if needed later) ---
-# POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'postgres_db')
-# POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-# POSTGRES_DB = os.getenv('POSTGRES_DB')
-# POSTGRES_USER = os.getenv('POSTGRES_USER')
-# POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+# --- Development Configuration ---
+DEV_SCRAPER_SETTINGS = {
+    'max_sitemaps': 1,  # Limit sitemaps for testing
+    'max_products_per_category': 5,  # Reduced for faster testing
+    'test_mode': True,  # Continue on errors in development
+    'enable_data_export': True,
+}
+
+# --- Database Configuration ---
+POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+POSTGRES_DB = os.getenv('POSTGRES_DB', 'products_db')
+POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'postgres')

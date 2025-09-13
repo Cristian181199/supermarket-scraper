@@ -111,9 +111,20 @@ class ValidationPipeline:
         # Validate price format
         price_amount = adapter.get('price_amount')
         if price_amount is not None:
-            if not isinstance(price_amount, (int, float)) or price_amount < 0:
+            try:
+                # Handle Decimal, int, float types
+                from decimal import Decimal
+                if isinstance(price_amount, (int, float, Decimal)):
+                    price_float = float(price_amount)
+                    if price_float < 0:
+                        spider.crawler.stats.inc_value('validation_pipeline/invalid_price')
+                        raise DropItem(f"Negative price amount: {price_amount}")
+                else:
+                    spider.crawler.stats.inc_value('validation_pipeline/invalid_price_type')
+                    raise DropItem(f"Invalid price type {type(price_amount)}: {price_amount}")
+            except (ValueError, TypeError) as e:
                 spider.crawler.stats.inc_value('validation_pipeline/invalid_price')
-                raise DropItem(f"Invalid price amount: {price_amount}")
+                raise DropItem(f"Invalid price amount: {price_amount} - {e}")
         
         # Validate currency format
         currency = adapter.get('price_currency')

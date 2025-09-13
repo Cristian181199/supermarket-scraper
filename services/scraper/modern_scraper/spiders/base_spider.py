@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import re
 import time
 
-from ..items import ModernProductItem
+from ..items.product_item import ModernProductItem
 from ..utils import PriceParser, DataEnricher
 
 logger = logging.getLogger(__name__)
@@ -91,17 +91,18 @@ class BaseSpider(scrapy.Spider):
         else:
             # Default limits when crawler is not available yet
             return {
-                'max_items': 50,
-                'max_pages': 100,
-                'max_time_minutes': 5,
-                'max_sitemaps': 2,
-                'max_products_per_category': 10,
+                'max_items': 5,  # Reduced for faster testing
+                'max_pages': 20, # Reduced for faster testing
+                'max_time_minutes': 3,
+                'max_sitemaps': 1,
+                'max_products_per_category': 5,
                 'test_mode': True,
             }
     
-    def start_requests(self):
+    async def start(self):
         """
-        Genera las requests iniciales aplicando límites de desarrollo.
+        Async method to generate initial requests (Scrapy 2.13+).
+        Replaces the deprecated start_requests() method.
         """
         start_urls = self.start_urls.copy()
         

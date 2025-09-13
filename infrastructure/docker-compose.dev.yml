@@ -1,21 +1,21 @@
-# Docker Compose for modular Edeka Scraper architecture
+# Docker Compose for DEVELOPMENT Environment
 version: '3.8'
 
 services:
   postgres_db:
-    container_name: postgres_db
+    container_name: postgres_db_dev
     build:
       context: ..
       dockerfile: ./infrastructure/docker/postgres.Dockerfile
     env_file:
-      - ../.env
+      - ../.env.dev
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Different port to avoid conflicts
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - postgres_logs:/var/log/postgresql
+      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_logs_dev:/var/log/postgresql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
@@ -24,43 +24,57 @@ services:
       retries: 5
 
   api:
-    container_name: api
+    container_name: api_dev
     build:
       context: ..
       dockerfile: ./infrastructure/docker/api.Dockerfile
     env_file:
-      - ../.env
+      - ../.env.dev
     environment:
       - PYTHONPATH=/usr/src/app
+      - APP_ENV=development
     volumes:
       - ../services/api:/usr/src/app/services/api
       - ../shared:/usr/src/app/shared
     ports:
-      - "8000:8000"
+      - "8001:8000"  # Different port for dev
     depends_on:
       postgres_db:
         condition: service_healthy
     restart: unless-stopped
-    command: ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: [
+      "uvicorn", 
+      "services.api.main:app", 
+      "--host", "0.0.0.0", 
+      "--port", "8000", 
+      "--reload",
+      "--log-level", "debug"
+    ]
 
   scraper:
-    container_name: scraper
+    container_name: scraper_dev
     build:
       context: ..
       dockerfile: ./infrastructure/docker/scraper.Dockerfile
     env_file:
-      - ../.env
+      - ../.env.dev
     environment:
       - PYTHONPATH=/usr/src/app
+      - APP_ENV=development
     volumes:
       - ../services/scraper:/usr/src/app/services/scraper
       - ../shared:/usr/src/app/shared
     depends_on:
       postgres_db:
         condition: service_healthy
-    restart: "no"
-    command: ["python", "services/scraper/docker_run_spider.py", "--spider", "edeka24_spider", "--output", "docker_test.json"]
+    restart: "no"  # Don't auto-restart in dev
+    command: [
+      "python", 
+      "services/scraper/docker_run_spider.py", 
+      "--spider", "edeka24_spider", 
+      "--output", "dev_test.json"
+    ]
 
 volumes:
-  postgres_data:
-  postgres_logs:
+  postgres_data_dev:
+  postgres_logs_dev:

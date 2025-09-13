@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Generator, Any, List, Optional
 
 from .base_spider import BaseSpider
-from ..items import ModernProductItem
+from ..items.product_item import ModernProductItem
 
 import logging
 logger = logging.getLogger(__name__)
@@ -50,8 +50,8 @@ class Edeka24Spider(BaseSpider):
         logger.info(f"🔗 Starting with {len(self.start_urls)} category URLs")
         logger.info(f"📊 Dev limits: {self.dev_limits}")
     
-    def start_requests(self) -> Generator[scrapy.Request, None, None]:
-        """Generate initial requests for category pages."""
+    async def start(self):
+        """Generate initial requests for category pages (Scrapy 2.13+)."""
         logger.info("🚀 Starting Edeka24 spider requests")
         
         for i, url in enumerate(self.start_urls):

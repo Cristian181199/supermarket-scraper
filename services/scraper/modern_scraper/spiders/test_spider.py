@@ -214,7 +214,7 @@ class TestSpider(BaseSpider):
         except (ValueError, IndexError):
             return 0
     
-    def start_requests(self) -> Generator[scrapy.Request, None, None]:
+    def start(self) -> Generator[scrapy.Request, None, None]:
         """
         Generate initial requests for test URLs.
         """

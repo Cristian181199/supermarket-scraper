@@ -1,0 +1,106 @@
+# Docker Compose for PRODUCTION Environment
+version: '3.8'
+
+services:
+  postgres_db:
+    container_name: postgres_db_prod
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/postgres.prod.Dockerfile
+    env_file:
+      - ../.env.prod
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=md5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - postgres_logs_prod:/var/log/postgresql
+      - ../infrastructure/backups:/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  api:
+    container_name: api_prod
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/api.prod.Dockerfile
+    env_file:
+      - ../.env.prod
+    environment:
+      - PYTHONPATH=/usr/src/app
+      - APP_ENV=production
+    volumes:
+      - ../logs:/usr/src/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: [
+      "gunicorn",
+      "services.api.main:app",
+      "--workers", "2",
+      "--worker-class", "uvicorn.workers.UvicornWorker",
+      "--bind", "0.0.0.0:8000",
+      "--access-logfile", "-",
+      "--error-logfile", "-",
+      "--log-level", "info"
+    ]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  scraper:
+    container_name: scraper_prod
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/scraper.prod.Dockerfile
+    env_file:
+      - ../.env.prod
+    environment:
+      - PYTHONPATH=/usr/src/app
+      - APP_ENV=production
+    volumes:
+      - ../data:/usr/src/app/data
+      - ../logs:/usr/src/app/logs
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: [
+      "python", 
+      "services/scraper/docker_run_spider.py", 
+      "--spider", "edeka24_spider"
+    ]
+
+  # Background job scheduler for production
+  scheduler:
+    container_name: scheduler_prod
+    build:
+      context: ..
+      dockerfile: ./infrastructure/docker/scheduler.Dockerfile
+    env_file:
+      - ../.env.prod
+    environment:
+      - PYTHONPATH=/usr/src/app
+      - APP_ENV=production
+    volumes:
+      - ../logs:/usr/src/app/logs
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "services/scheduler/main.py"]
+
+volumes:
+  postgres_data_prod:
+  postgres_logs_prod:

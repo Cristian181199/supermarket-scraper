@@ -13,17 +13,46 @@ from scrapy import Spider
 from scrapy.exceptions import DropItem
 from datetime import datetime
 
-# Add project root to Python path to access shared modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
-
-from shared.database.config import db_manager
-from shared.database.repositories import (
-    ProductRepository, StoreRepository, 
-    CategoryRepository, ManufacturerRepository
-)
-from shared.database.services.product_service import ProductService
-
+# Initialize logger early
 logger = logging.getLogger(__name__)
+
+# Add project root to Python path to access shared modules
+# From: /Users/.../services/scraper/modern_scraper/pipelines/database.py
+# To:   /Users/.../edeka-scraper (project root)
+project_root = os.path.dirname(__file__)  # pipelines dir
+project_root = os.path.dirname(project_root)  # modern_scraper dir
+project_root = os.path.dirname(project_root)  # scraper dir
+project_root = os.path.dirname(project_root)  # services dir
+project_root = os.path.dirname(project_root)  # edeka-scraper dir (project root)
+project_root = os.path.abspath(project_root)
+
+logger.info(f"Database pipeline trying to load shared modules from: {project_root}")
+
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Alternative approach: set PYTHONPATH environment variable
+os.environ['PYTHONPATH'] = f"{project_root}:{os.environ.get('PYTHONPATH', '')}"
+
+try:
+    from shared.database.config import db_manager
+    from shared.database.repositories import (
+        ProductRepository, StoreRepository, 
+        CategoryRepository, ManufacturerRepository
+    )
+    from shared.database.services.product_service import ProductService
+    logger.info("Successfully imported shared modules")
+except ImportError as e:
+    logger.error(f"Failed to import shared modules: {e}")
+    logger.error(f"Project root: {project_root}")
+    logger.error(f"Python path: {sys.path[:5]}...")
+    logger.error(f"Contents of project root: {os.listdir(project_root) if os.path.exists(project_root) else 'Not found'}")
+    # Check if shared directory exists
+    shared_path = os.path.join(project_root, 'shared')
+    logger.error(f"Shared directory exists: {os.path.exists(shared_path)}")
+    if os.path.exists(shared_path):
+        logger.error(f"Contents of shared: {os.listdir(shared_path)}")
+    raise ImportError(f"Cannot import shared modules. Please ensure the shared directory is accessible. Error: {e}")
 
 
 class DatabasePipeline:
@@ -52,7 +81,7 @@ class DatabasePipeline:
         # Initialize services
         self.product_service = ProductService()
         
-        # Cache for database objects to avoid repeated lookups
+        # Cache for database IDs to avoid repeated lookups (store IDs instead of objects)
         self.store_cache = {}
         self.category_cache = {}
         self.manufacturer_cache = {}
@@ -107,10 +136,13 @@ class DatabasePipeline:
         store_name = adapter.get('store_name')
         store_slug = adapter.get('store_slug') or store_name.lower().replace(' ', '-')
         
-        # Check cache first
+        # Check cache first (store ID instead of object)
         cache_key = f"{store_name}:{store_slug}"
         if cache_key in self.store_cache:
-            return self.store_cache[cache_key]
+            store_id = self.store_cache[cache_key]
+            existing_store = session.query(self.store_repo.model).filter_by(id=store_id).first()
+            if existing_store:
+                return existing_store
         
         try:
             # Try to get existing store by slug
@@ -119,7 +151,7 @@ class DatabasePipeline:
             ).filter_by(slug=store_slug).first()
             
             if existing_store:
-                self.store_cache[cache_key] = existing_store
+                self.store_cache[cache_key] = existing_store.id  # Cache ID, not object
                 return existing_store
             
             # Create new store
@@ -135,7 +167,8 @@ class DatabasePipeline:
             }
             
             new_store = self.store_repo.create(session, obj_in=store_data)
-            self.store_cache[cache_key] = new_store
+            session.flush()  # Ensure ID is available
+            self.store_cache[cache_key] = new_store.id  # Cache ID, not object
             self.stats['new_stores'] += 1
             spider.crawler.stats.inc_value('database_pipeline/new_stores')
             
@@ -175,11 +208,14 @@ class DatabasePipeline:
                 cat_slug = cat_info['slug']
                 cat_level = cat_info['level']
                 
-                # Check cache
+                # Check cache (use ID instead of object)
                 cache_key = f"{cat_slug}:{cat_level}:{parent_category.id if parent_category else 'root'}"
                 if cache_key in self.category_cache:
-                    parent_category = self.category_cache[cache_key]
-                    continue
+                    category_id = self.category_cache[cache_key]
+                    cached_category = session.query(self.category_repo.model).filter_by(id=category_id).first()
+                    if cached_category:
+                        parent_category = cached_category
+                        continue
                 
                 # Try to find existing category
                 query = session.query(self.category_repo.model).filter_by(
@@ -190,7 +226,7 @@ class DatabasePipeline:
                 
                 if existing_category:
                     parent_category = existing_category
-                    self.category_cache[cache_key] = existing_category
+                    self.category_cache[cache_key] = existing_category.id  # Cache ID, not object
                     continue
                 
                 # Create new category
@@ -211,7 +247,8 @@ class DatabasePipeline:
                     category_data['path'] = cat_name
                 
                 new_category = self.category_repo.create(session, obj_in=category_data)
-                self.category_cache[cache_key] = new_category
+                session.flush()  # Ensure ID is available
+                self.category_cache[cache_key] = new_category.id  # Cache ID, not object
                 parent_category = new_category
                 
                 self.stats['new_categories'] += 1
@@ -234,10 +271,13 @@ class DatabasePipeline:
         if not manufacturer_name:
             return None
         
-        # Check cache
+        # Check cache (use ID instead of object)
         cache_key = manufacturer_name
         if cache_key in self.manufacturer_cache:
-            return self.manufacturer_cache[cache_key]
+            manufacturer_id = self.manufacturer_cache[cache_key]
+            cached_manufacturer = session.query(self.manufacturer_repo.model).filter_by(id=manufacturer_id).first()
+            if cached_manufacturer:
+                return cached_manufacturer
         
         try:
             # Try to find existing manufacturer
@@ -246,7 +286,7 @@ class DatabasePipeline:
             ).filter_by(name=manufacturer_name).first()
             
             if existing_manufacturer:
-                self.manufacturer_cache[cache_key] = existing_manufacturer
+                self.manufacturer_cache[cache_key] = existing_manufacturer.id  # Cache ID, not object
                 return existing_manufacturer
             
             # Create new manufacturer
@@ -259,7 +299,8 @@ class DatabasePipeline:
             }
             
             new_manufacturer = self.manufacturer_repo.create(session, obj_in=manufacturer_data)
-            self.manufacturer_cache[cache_key] = new_manufacturer
+            session.flush()  # Ensure ID is available
+            self.manufacturer_cache[cache_key] = new_manufacturer.id  # Cache ID, not object
             self.stats['new_manufacturers'] += 1
             spider.crawler.stats.inc_value('database_pipeline/new_manufacturers')
             
