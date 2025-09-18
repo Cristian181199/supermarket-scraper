@@ -1,0 +1,12 @@
+# ===================================================================
+# TAREAS PROGRAMADAS (CRON) PARA POSTGRESQL
+# ===================================================================
+# Formato: min hora día_mes mes día_semana comando
+
+# Ejecutar un backup completo todos los días a las 03:00 AM
+0 3 * * * /usr/local/bin/backup-db >> /var/log/cron.log 2>&1
+
+# Ejecutar mantenimiento una vez por semana, los domingos a las 04:00 AM
+0 4 * * 0 /usr/local/bin/maintenance >> /var/log/cron.log 2>&1
+
+# Línea vacía final requerida por algunos sistemas cron
