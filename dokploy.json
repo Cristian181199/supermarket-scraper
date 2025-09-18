@@ -4,8 +4,8 @@
   "description": "Modern product scraping system for Supermarkets",
   
   "build": {
-    "context": "./infrastructure",
-    "dockerfile": "docker-compose.prod.yml",
+    "context": "./",
+    "dockerfile": "infrastructure/docker-compose.prod.yml",
     "type": "docker-compose"
   },
   
