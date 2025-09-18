@@ -46,7 +46,7 @@
       "depends_on": ["postgres_db"],
       "domain": {
         "enabled": true,
-        "subdomain": "api",
+        "subdomain": "api.retailflux.de",
         "ssl": true
       },
       "healthcheck": {
