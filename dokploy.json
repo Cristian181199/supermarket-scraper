@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "name": "edeka-scraper",
-  "description": "Modern product scraping system for Edeka24",
+  "name": "retailflux",
+  "description": "Modern product scraping system for Supermarkets",
   
   "build": {
     "context": "./infrastructure",
@@ -50,7 +50,7 @@
         "ssl": true
       },
       "healthcheck": {
-        "test": ["CMD", "curl", "-f", "http://localhost:8000/health"],
+        "test": ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"],
         "interval": "30s",
         "timeout": "10s",
         "retries": 3
