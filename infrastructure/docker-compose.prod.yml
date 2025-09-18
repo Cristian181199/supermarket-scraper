@@ -82,24 +82,6 @@ services:
       "--spider", "edeka24_spider"
     ]
 
-  # Background job scheduler for production
-  scheduler:
-    container_name: scheduler_prod
-    build:
-      context: ..
-      dockerfile: ./infrastructure/docker/scheduler.Dockerfile
-    env_file:
-      - ../.env.prod
-    environment:
-      - PYTHONPATH=/usr/src/app
-      - APP_ENV=production
-    volumes:
-      - ../logs:/usr/src/app/logs
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-    restart: unless-stopped
-    command: ["python", "services/scheduler/main.py"]
 
 volumes:
   postgres_data_prod:
