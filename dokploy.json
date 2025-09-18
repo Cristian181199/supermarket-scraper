@@ -10,7 +10,6 @@
   },
   
   "environment": {
-    "file": ".env.prod",
     "required_vars": [
       "POSTGRES_PASSWORD",
       "OPENAI_API_KEY",
