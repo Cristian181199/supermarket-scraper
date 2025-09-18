@@ -53,10 +53,6 @@ RUN mkdir -p /usr/src/app/data \
     && mkdir -p /usr/src/app/services/scraper/modern_scraper/debug \
     && chown -R scraper:scraper /usr/src/app
 
-# Copy cron jobs
-COPY infrastructure/docker/scraper-crontab /etc/cron.d/scraper-jobs
-RUN chmod 0644 /etc/cron.d/scraper-jobs
-
 # Switch to non-root user
 USER scraper
 
