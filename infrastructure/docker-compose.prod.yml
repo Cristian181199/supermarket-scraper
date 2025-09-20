@@ -33,9 +33,10 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_DB=products_db_prod
+      - POSTGRES_USER=retailflux_user
+      - POSTGRES_PASSWORD=7u8%5I?FjG^;WHa'CW3ce.E'agig*d
     volumes:
       - ../logs:/usr/src/app/logs
     ports:
@@ -68,6 +69,7 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
+      - POSTGRES_HOST=postgres_db
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -77,7 +79,6 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
-    command: ["tail", "-f", "/dev/null"]
     restart: on-failure
 
 
