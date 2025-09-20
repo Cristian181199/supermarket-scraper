@@ -33,6 +33,7 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
+      - POSTGRES_HOST=postgres_db
     volumes:
       - ../logs:/usr/src/app/logs
     ports:
@@ -65,6 +66,7 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
+      - POSTGRES_HOST=postgres_db
     volumes:
       - ../data:/usr/src/app/data
       - ../logs:/usr/src/app/logs
@@ -72,11 +74,6 @@ services:
       postgres_db:
         condition: service_healthy
     restart: unless-stopped
-    command: [
-      "python", 
-      "services/scraper/docker_run_spider.py", 
-      "--spider", "edeka24_spider"
-    ]
 
 
 volumes:
