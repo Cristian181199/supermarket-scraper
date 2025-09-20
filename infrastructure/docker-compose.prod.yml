@@ -30,6 +30,12 @@ services:
     build:
       context: ..
       dockerfile: ./infrastructure/docker/api.prod.Dockerfile
+    environment:
+      - PYTHONPATH=/usr/src/app
+      - APP_ENV=production
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ../logs:/usr/src/app/logs
     ports:
@@ -59,6 +65,12 @@ services:
     build:
       context: ..
       dockerfile: ./infrastructure/docker/scraper.prod.Dockerfile
+    environment:
+      - PYTHONPATH=/usr/src/app
+      - APP_ENV=production
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ../data:/usr/src/app/data
       - ../logs:/usr/src/app/logs
