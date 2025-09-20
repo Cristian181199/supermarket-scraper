@@ -1,43 +1,56 @@
-# Production API Dockerfile (Versión con Entrypoint)
+# Production API Dockerfile
 FROM python:3.11-slim
 
+# Set work directory
 WORKDIR /usr/src/app
+
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV APP_ENV=production
 
-# Instalar dependencias del sistema, incluyendo netcat-openbsd para el script de espera
+# Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc g++ curl postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-COPY --chown=appuser:appuser services/api/requirements.txt ./services/api/requirements.txt
-COPY --chown=appuser:appuser shared/requirements.txt ./shared/requirements.txt
-# Copiamos alembic.ini para que el comando de migración funcione
-COPY --chown=appuser:appuser infrastructure/alembic.ini ./infrastructure/alembic.ini
+# Copy requirements and install Python dependencies
+COPY services/api/requirements.txt /usr/src/app/services/api/requirements.txt
+COPY shared/requirements.txt /usr/src/app/shared/requirements.txt
+COPY infrastructure/alembic.ini ./infrastructure/alembic.ini
 
-USER appuser
-ENV PATH="/home/appuser/.local/bin:${PATH}"
-
+# Install production dependencies
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r services/api/requirements.txt
 RUN pip install --no-cache-dir -r shared/requirements.txt
 RUN pip install --no-cache-dir gunicorn alembic
 
-# Copiamos todo el código de la aplicación
-USER root
-COPY --chown=appuser:appuser . .
+# Copy project files
+COPY services/api /usr/src/app/services/api
+COPY shared /usr/src/app/shared
 
-# Copiamos y damos permisos de ejecución al script de inicio
-COPY --chown=appuser:appuser infrastructure/docker/api-entrypoint.prod.sh /usr/local/bin/api-entrypoint.prod.sh
+# Create directories and set permissions
+RUN mkdir -p /usr/src/app/logs \
+    && chown -R appuser:appuser /usr/src/app
+
+COPY infrastructure/docker/api-entrypoint.prod.sh /usr/local/bin/api-entrypoint.prod.sh
 RUN chmod +x /usr/local/bin/api-entrypoint.prod.sh
 
+# Switch to non-root user
 USER appuser
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Set PYTHONPATH
 ENV PYTHONPATH=/usr/src/app
+
+# Expose port
 EXPOSE 8000
 
-# Usamos el script como punto de entrada
+# Default command (can be overridden)
 ENTRYPOINT ["/usr/local/bin/api-entrypoint.prod.sh"]
