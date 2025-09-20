@@ -33,10 +33,10 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
-      - POSTGRES_HOST=postgres_db
-      - POSTGRES_DB=products_db_prod
-      - POSTGRES_USER=retailflux_user
-      - POSTGRES_PASSWORD=7u8%5I?FjG^;WHa'CW3ce.E'agig*d
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ../logs:/usr/src/app/logs
     ports:
@@ -45,16 +45,6 @@ services:
       postgres_db:
         condition: service_healthy
     restart: unless-stopped
-    command: [
-      "gunicorn",
-      "services.api.main:app",
-      "--workers", "2",
-      "--worker-class", "uvicorn.workers.UvicornWorker",
-      "--bind", "0.0.0.0:8000",
-      "--access-logfile", "-",
-      "--error-logfile", "-",
-      "--log-level", "info"
-    ]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -69,7 +59,7 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app
       - APP_ENV=production
-      - POSTGRES_HOST=postgres_db
+      - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -78,6 +68,8 @@ services:
       - ../logs:/usr/src/app/logs
     depends_on:
       postgres_db:
+        condition: service_healthy
+      api:
         condition: service_healthy
     restart: on-failure
 
