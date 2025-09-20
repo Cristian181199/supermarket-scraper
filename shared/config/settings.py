@@ -11,11 +11,11 @@ class DatabaseSettings(BaseSettings):
     """Configuración de la base de datos."""
     
     # PostgreSQL Configuration
-    postgres_host: str = Field(default="localhost", env="POSTGRES_HOST")
-    postgres_port: int = Field(default=5432, env="POSTGRES_PORT")
-    postgres_db: str = Field(default="products_db", env="POSTGRES_DB")
-    postgres_user: str = Field(default="cristian", env="POSTGRES_USER")
-    postgres_password: str = Field(default="", env="POSTGRES_PASSWORD")
+    postgres_host: str = Field(default="localhost", env="${{POSTGRES_HOST}}")
+    postgres_port: int = Field(default=5432, env="${{POSTGRES_PORT}}")
+    postgres_db: str = Field(default="products_db", env="${{POSTGRES_DB}}")
+    postgres_user: str = Field(default="cristian", env="${{POSTGRES_USER}}")
+    postgres_password: str = Field(default="", env="${{POSTGRES_PASSWORD}}")
     
     # SQLAlchemy Configuration
     sqlalchemy_echo: bool = Field(default=False, env="SQLALCHEMY_ECHO")
@@ -49,7 +49,7 @@ class AISettings(BaseSettings):
     max_results: int = Field(default=10, env="MAX_SEARCH_RESULTS")
     
     class Config:
-        env_file = ".env"
+        #env_file = ".env"
         env_file_encoding = "utf-8"
 
 
@@ -69,7 +69,7 @@ class ScrapingSettings(BaseSettings):
     requests_per_minute: int = Field(default=30, env="REQUESTS_PER_MINUTE")
     
     class Config:
-        env_file = ".env"
+        #env_file = ".env"
         env_file_encoding = "utf-8"
 
 
@@ -100,7 +100,7 @@ class APISettings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
     
     class Config:
-        env_file = ".env"
+        #env_file = ".env"
         env_file_encoding = "utf-8"
 
 
