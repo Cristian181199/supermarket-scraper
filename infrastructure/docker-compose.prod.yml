@@ -73,7 +73,8 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
-    restart: unless-stopped
+    command: ["tail", "-f", "/dev/null"]
+    restart: on-failure
 
 
 volumes:
