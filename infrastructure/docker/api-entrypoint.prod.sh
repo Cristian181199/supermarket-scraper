@@ -21,9 +21,8 @@ done
 # --- 2. Ejecutar Migraciones de la Base de Datos ---
 echo "Ejecutando migraciones de la base de datos con Alembic..."
 
-# Navegamos al directorio correcto donde está alembic.ini
-cd /usr/src/app/infrastructure
-alembic upgrade head
+# SOLUCIÓN: Ejecutar alembic desde la raíz del proyecto y especificar la ruta al .ini
+alembic -c infrastructure/alembic.ini upgrade head
 
 echo "¡Migraciones completadas!"
 
