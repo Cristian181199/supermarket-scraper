@@ -2,7 +2,7 @@
 Configuración centralizada para el proyecto Edeka Scraper.
 """
 import os
-from typing import Optional
+from typing import Optional, List
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -90,10 +90,15 @@ class APISettings(BaseSettings):
     debug: bool = Field(default=False, env="API_DEBUG")
     
     # CORS Configuration
-    cors_origins: list = Field(
-        default=["http://localhost:3000", "http://localhost:8080"],
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8080",
         env="CORS_ORIGINS"
     )
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Convierte CORS_ORIGINS string a lista."""
+        return [origin.strip() for origin in self.cors_origins.split(',') if origin.strip()]
     
     # Authentication (for future use)
     jwt_secret_key: Optional[str] = Field(default=None, env="JWT_SECRET_KEY")

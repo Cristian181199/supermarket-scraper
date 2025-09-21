@@ -1,5 +1,4 @@
 # Docker Compose for LOCAL DEVELOPMENT
-version: '3.8'
 
 services:
   postgres_db:
